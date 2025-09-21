@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <title>Реєстрація</title>
+</head>
+<body>
+
+  <h2>Форма реєстрації</h2>
+  <form id="registerForm">
+    <label>
+      Ім’я: 
+      <input type="text" id="name" required>
+    </label><br><br>
+
+    <label>
+      Email: 
+      <input type="email" id="email" required>
+    </label><br><br>
+
+    <label>
+      Дата народження: 
+      <input type="date" id="dob" required>
+    </label><br><br>
+
+    <label>
+      Посада/Роль: 
+      <input type="text" id="role" required>
+    </label><br><br>
+
+    <p>Чи відвідували ви раніше наші заходи?</p>
+    <label><input type="radio" name="visited" value="так" required> Так</label>
+    <label><input type="radio" name="visited" value="ні" required> Ні</label>
+
+    <div id="eventField" class="hidden">
+      <label>
+        Назвіть захід, який ви відвідували: 
+        <input type="text" id="eventName">
+      </label>
+    </div>
+
+    <br>
+    <button type="submit">Зареєструватися</button>
+  </form>
+
+  <div id="errorMessage" style="color:red;"></div>
+
+  <script>
+    const style = document.createElement("style");
+    style.textContent = `.hidden { display: none; } 
+                         input, button { padding: 5px; margin: 5px; } 
+                         label { display: block; margin: 5px 0; }`;
+    document.head.appendChild(style);
+
+    const form = document.getElementById("registerForm");
+    const visitedRadios = document.querySelectorAll("input[name='visited']");
+    const eventField = document.getElementById("eventField");
+    const errorMessage = document.getElementById("errorMessage");
+
+    visitedRadios.forEach(radio => {
+      radio.addEventListener("change", () => {
+        if (radio.value === "так" && radio.checked) {
+          eventField.classList.remove("hidden");
+        } else if (radio.value === "ні" && radio.checked) {
+          eventField.classList.add("hidden");
+        }
+      });
+    });
+
+    function calculateAge(dob) {
+      const today = new Date();
+      const birthDate = new Date(dob);
+      let age = today.getFullYear() - birthDate.getFullYear();
+      const m = today.getMonth() - birthDate.getMonth();
+      if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+        age--;
+      }
+      return age;
+    }
+
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      errorMessage.textContent = "";
+
+      const name = document.getElementById("name").value.trim();
+      const email = document.getElementById("email").value.trim();
+      const dob = document.getElementById("dob").value;
+      const role = document.getElementById("role").value.trim();
+      const visited = document.querySelector("input[name='visited']:checked");
+      const eventName = document.getElementById("eventName").value.trim();
+
+      if (!name || !email || !dob || !role || !visited) {
+        errorMessage.textContent = "Будь ласка, заповніть всі поля!";
+        return;
+      }
+
+      const age = calculateAge(dob);
+      if (age < 18) {
+        errorMessage.textContent = "Вам має бути не менше 18 років!";
+        return;
+      }
+
+      if (visited.value === "так" && !eventName) {
+        errorMessage.textContent = "Будь ласка, вкажіть захід, який ви відвідували!";
+        return;
+      }
+
+      const userData = {
+        name,
+        email,
+        dob,
+        age,
+        role,
+        visited: visited.value,
+        event: visited.value === "так" ? eventName : "—"
+      };
+
+      console.log(userData);
+      alert("Форма успішно відправлена! Дані дивись у консолі.");
+      form.reset();
+      eventField.classList.add("hidden");
+    });
+  </script>
+
+</body>
+</html>
